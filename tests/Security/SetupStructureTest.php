@@ -11,26 +11,46 @@
  * Verify setup.php defines required plugin hooks and info function.
  */
 
-describe('slowlog setup.php structure', function () {
-	$source = file_get_contents(realpath(__DIR__ . '/../../setup.php'));
+$setupPath = realpath(__DIR__ . '/../../setup.php');
 
-	it('defines plugin_slowlog_install function', function () use ($source) {
-		expect($source)->toContain('function plugin_slowlog_install');
-	});
+if ($setupPath === false) {
+	throw new RuntimeException('Failed to resolve setup.php');
+}
 
-	it('defines plugin_slowlog_version function', function () use ($source) {
-		expect($source)->toContain('function plugin_slowlog_version');
-	});
+$source = file_get_contents($setupPath);
 
-	it('defines plugin_slowlog_uninstall function', function () use ($source) {
-		expect($source)->toContain('function plugin_slowlog_uninstall');
-	});
+if ($source === false) {
+	throw new RuntimeException('Failed to read setup.php');
+}
 
-	it('returns version array with name key', function () use ($source) {
-		expect($source)->toMatch('/[\'\""]name[\'\""]\s*=>/');
-	});
+$infoPath = realpath(__DIR__ . '/../../INFO');
 
-	it('returns version array with version key', function () use ($source) {
-		expect($source)->toMatch('/[\'\""]version[\'\""]\s*=>/');
-	});
+if ($infoPath === false) {
+	throw new RuntimeException('Failed to resolve INFO file');
+}
+
+$info = file_get_contents($infoPath);
+
+if ($info === false) {
+	throw new RuntimeException('Failed to read INFO file');
+}
+
+it('defines plugin_slowlog_install function', function () use ($source) {
+	expect($source)->toContain('function plugin_slowlog_install');
+});
+
+it('defines plugin_slowlog_version function', function () use ($source) {
+	expect($source)->toContain('function plugin_slowlog_version');
+});
+
+it('defines plugin_slowlog_uninstall function', function () use ($source) {
+	expect($source)->toContain('function plugin_slowlog_uninstall');
+});
+
+it('declares a name in the INFO file', function () use ($info) {
+	expect($info)->toMatch('/^name\s*=/m');
+});
+
+it('declares a version in the INFO file', function () use ($info) {
+	expect($info)->toMatch('/^version\s*=/m');
 });
